@@ -45,18 +45,18 @@ export default function AlbumPage({ params }: AlbumPageProps) {
           setUnlocked(true);
           setAlbum(data);    // load assets
           setError("");
-          setPassword("");   // 👈 clear the input box
+          setPassword("");
         } else {
           setError("Invalid password");
-          setPassword("");   // 👈 also clear on failure if you want
+          setPassword("");
         }
       } else {
         setError("Invalid password");
-        setPassword("");     // 👈 clear box
+        setPassword("");
       }
     } catch (err) {
       setError("Something went wrong");
-      setPassword("");       // 👈 clear box
+      setPassword("");
     }
   }
 
@@ -110,7 +110,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
   }
 
 
-  // 👇 Normal gallery view
+  // Normal gallery view
   return (
     <main className="min-h-screen bg-black text-white p-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-100">{album.title}</h1>
