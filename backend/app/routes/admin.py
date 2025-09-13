@@ -18,6 +18,23 @@ def get_db():
     finally:
         db.close()
 
+@router.get("/albums/{album_id}")
+def get_album_admin(album_id: str, db: Session = Depends(get_db)):
+    album = db.query(Album).filter(Album.id == album_id).first()
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+
+    return {
+        "id": album.id,
+        "title": album.title,
+        "description": album.description,
+        "is_protected": bool(album.password_hash),
+        "assets": [
+            {"id": a.id, "file_path": a.file_path, "thumb_path": a.thumb_path}
+            for a in album.assets
+        ],
+    }
+
 @router.post("/albums")
 def create_album(
     title: str = Form(...),

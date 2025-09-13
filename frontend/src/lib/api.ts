@@ -41,6 +41,12 @@ export async function fetchAlbum(id: string) {
   return res.json();
 }
 
+export async function fetchAlbumAdmin(id: string) {
+  const res = await fetch(`${API_BASE}/api/admin/albums/${id}`, { cache: "no-store" });
+  if (!res.ok) throw new Error("Failed to fetch album (admin)");
+  return res.json();
+}
+
 // Bulk upload photos
 export async function bulkUpload(albumId: string, files: FileList) {
   const formData = new FormData();

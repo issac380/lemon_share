@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import {
-  fetchAlbum,
+  fetchAlbumAdmin,
   deleteAsset,
   bulkUpload,
   API_BASE,
@@ -22,7 +22,7 @@ export default function AdminAlbumPage({ params }: AdminAlbumPageProps) {
 
   useEffect(() => {
     params.then(({ id }) => {
-      fetchAlbum(id).then((data) => {
+      fetchAlbumAdmin(id).then((data) => {
         setAlbum(data);
         setLoading(false);
       });
@@ -36,7 +36,7 @@ export default function AdminAlbumPage({ params }: AdminAlbumPageProps) {
     setUploading(true);
     params.then(({ id }) => {
       bulkUpload(id, files).then(() => {
-        fetchAlbum(id).then((data) => {
+        fetchAlbumAdmin(id).then((data) => {
           setAlbum(data);
           setUploading(false);
         });
@@ -47,7 +47,7 @@ export default function AdminAlbumPage({ params }: AdminAlbumPageProps) {
   async function handleDeleteAsset(assetId: string) {
     await deleteAsset(assetId);
     params.then(({ id }) => {
-      fetchAlbum(id).then((data) => setAlbum(data));
+      fetchAlbumAdmin(id).then((data) => setAlbum(data));
     });
   }
 
