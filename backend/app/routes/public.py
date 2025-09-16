@@ -1,8 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import APIRouter, Depends, HTTPException, Form, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from ..db import SessionLocal
-from ..models import Album
+from ..models import Album, Asset
 from ..auth import verify_password
+import zipfile
+import io
+import os
+from pathlib import Path
+import json
 
 router = APIRouter(prefix="/api")
 
@@ -100,3 +106,79 @@ def unlock_album(album_id: str, password: str = Form(...), db: Session = Depends
         }
 
     raise HTTPException(status_code=403, detail="Invalid password")
+
+
+@router.get("/albums/{album_id}/download")
+def download_album(album_id: str, db: Session = Depends(get_db)):
+    """
+    Download entire album as a ZIP file.
+    """
+    album = db.query(Album).filter(Album.id == album_id).first()
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    if not album.assets:
+        raise HTTPException(status_code=400, detail="No images in album")
+    
+    # Create ZIP file in memory
+    zip_buffer = io.BytesIO()
+    
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for asset in album.assets:
+            file_path = Path(asset.file_path)
+            if file_path.exists():
+                # Add file to zip with original filename
+                zip_file.write(file_path, file_path.name)
+    
+    zip_buffer.seek(0)
+    
+    return StreamingResponse(
+        io.BytesIO(zip_buffer.read()),
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={album.title.replace(' ', '_')}_full_album.zip"}
+    )
+
+
+@router.post("/albums/{album_id}/download-liked")
+def download_liked_images(album_id: str, liked_ids: str = Form(...), db: Session = Depends(get_db)):
+    """
+    Download only liked images as a ZIP file.
+    """
+    album = db.query(Album).filter(Album.id == album_id).first()
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+    
+    try:
+        liked_asset_ids = json.loads(liked_ids)
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=400, detail="Invalid liked_ids format")
+    
+    if not liked_asset_ids:
+        raise HTTPException(status_code=400, detail="No liked images to download")
+    
+    # Get liked assets
+    liked_assets = db.query(Asset).filter(
+        Asset.album_id == album_id,
+        Asset.id.in_(liked_asset_ids)
+    ).all()
+    
+    if not liked_assets:
+        raise HTTPException(status_code=400, detail="No valid liked images found")
+    
+    # Create ZIP file in memory
+    zip_buffer = io.BytesIO()
+    
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for asset in liked_assets:
+            file_path = Path(asset.file_path)
+            if file_path.exists():
+                # Add file to zip with original filename
+                zip_file.write(file_path, file_path.name)
+    
+    zip_buffer.seek(0)
+    
+    return StreamingResponse(
+        io.BytesIO(zip_buffer.read()),
+        media_type="application/zip",
+        headers={"Content-Disposition": f"attachment; filename={album.title.replace(' ', '_')}_liked_images.zip"}
+    )
