@@ -33,6 +33,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // ❤️ liked photos
   const [likedPhotos, setLikedPhotos] = useState<string[]>([]);
@@ -125,6 +126,32 @@ export default function AlbumPage({ params }: AlbumPageProps) {
     }
   };
 
+  // 🔗 Share album
+  const handleShare = () => {
+    const shareUrl = window.location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: album.title,
+        text: `Check out this photo album: ${album.title}`,
+        url: shareUrl,
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("Link copied to clipboard!");
+      });
+    }
+  };
+
+  // 📋 Copy shareable link
+  const copyShareLink = () => {
+    const shareUrl = window.location.href;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      alert("Shareable link copied to clipboard!");
+      setShowShareModal(false);
+    });
+  };
+
   if (loading) return <p className="p-8 text-gray-600">Loading album...</p>;
   if (!album) return <p className="p-8 text-gray-600">Album not found</p>;
 
@@ -201,7 +228,10 @@ export default function AlbumPage({ params }: AlbumPageProps) {
           >
             <ArrowDownTrayIcon className="w-5 h-5" /> Download All
           </button>
-          <button className="flex items-center gap-1 hover:text-black">
+          <button 
+            onClick={() => setShowShareModal(true)}
+            className="flex items-center gap-1 hover:text-black"
+          >
             <ShareIcon className="w-5 h-5" /> Share
           </button>
         </div>
@@ -295,6 +325,43 @@ export default function AlbumPage({ params }: AlbumPageProps) {
             src: `${API_BASE}/${asset.file_path}`,
           }))}
         />
+      )}
+
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full">
+            <h3 className="text-xl font-semibold text-gray-900 mb-4">Share Album</h3>
+            <p className="text-gray-600 mb-4">
+              Share this album with others using the link below:
+            </p>
+            <div className="bg-gray-100 p-3 rounded-lg mb-4">
+              <code className="text-sm text-gray-700 break-all">
+                {typeof window !== 'undefined' ? window.location.href : ''}
+              </code>
+            </div>
+            <div className="flex space-x-3">
+              <button
+                onClick={copyShareLink}
+                className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Copy Link
+              </button>
+              <button
+                onClick={handleShare}
+                className="flex-1 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+              >
+                Share
+              </button>
+              <button
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </main>
   );
