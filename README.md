@@ -1,15 +1,39 @@
 ## Getting Started
 
-First, cd into the backend directory and run the backend:
+### Quick Start (Recommended)
+
+Run both backend and frontend with a single command:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8001
+npm start
 ```
 
-Then, cd into /frontend run the development server:
+This will start:
+- Backend server on http://localhost:8001
+- Frontend server on http://localhost:3000
+
+### Manual Setup
+
+If you prefer to run services separately:
+
+1. **Backend:**
+   ```bash
+   cd backend
+   uvicorn app.main:app --host 0.0.0.0 --port 8001
+   ```
+
+2. **Frontend:**
+   ```bash
+   cd frontend
+   npm run dev
+   ```
+
+### First Time Setup
+
+Install all dependencies:
 
 ```bash
-npm run dev
+npm run setup
 ```
 
 frontend/

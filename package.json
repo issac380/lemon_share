@@ -1,0 +1,16 @@
+{
+  "name": "lemon-share",
+  "version": "1.0.0",
+  "description": "A photo sharing application with FastAPI backend and Next.js frontend",
+  "scripts": {
+    "start": "./start.sh",
+    "dev": "./start.sh",
+    "backend": "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 8001",
+    "frontend": "cd frontend && npm run dev",
+    "install-all": "cd frontend && npm install && cd ../backend && pip3 install -r requirements.txt",
+    "setup": "npm run install-all"
+  },
+  "keywords": ["photo-sharing", "fastapi", "nextjs", "react"],
+  "author": "",
+  "license": "MIT"
+}
