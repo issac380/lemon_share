@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Form, Response
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from ..db import SessionLocal
-from ..models import Album, Asset
+from ..models import Album, Asset, SiteSettings
 from ..auth import verify_password
 import zipfile
 import io
@@ -23,10 +23,10 @@ def get_db():
 @router.get("/albums")
 def list_albums(db: Session = Depends(get_db)):
     """
-    List all albums (public + protected).
+    List all published albums ordered by display_order.
     Always include is_protected flag, but never include assets.
     """
-    albums = db.query(Album).all()
+    albums = db.query(Album).filter(Album.is_published == True).order_by(Album.display_order.asc()).all()
     return [
         {
             "id": a.id,
@@ -36,6 +36,34 @@ def list_albums(db: Session = Depends(get_db)):
         }
         for a in albums
     ]
+
+@router.get("/site-settings")
+def get_public_site_settings(db: Session = Depends(get_db)):
+    """
+    Get published site settings for public display.
+    """
+    settings = db.query(SiteSettings).filter(SiteSettings.is_published == True).first()
+    if not settings:
+        # Return default settings if none published
+        return {
+            "site_title": "PORTRAITS BY KT MERRY",
+            "site_subtitle": "PHOTO GALLERIES",
+            "hero_text": None,
+            "footer_text": None,
+            "theme_color": "#000000",
+            "background_color": "#ffffff",
+            "layout_settings": {}
+        }
+    
+    return {
+        "site_title": settings.site_title,
+        "site_subtitle": settings.site_subtitle,
+        "hero_text": settings.hero_text,
+        "footer_text": settings.footer_text,
+        "theme_color": settings.theme_color,
+        "background_color": settings.background_color,
+        "layout_settings": settings.layout_settings or {}
+    }
 
 
 @router.get("/albums/{album_id}")

@@ -289,45 +289,48 @@ export default function AlbumPage({ params }: AlbumPageProps) {
     <main
       className={`${inter.className} min-h-screen bg-white text-gray-900`}
     >
-      {/* Professional Gallery Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      {/* Elegant Thin Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-6 py-3">
           <div className="flex justify-between items-center">
             {/* Left: Album Info */}
             <div>
-              <h1 className={`${playfair.className} text-2xl font-normal tracking-wide text-gray-900`}>
+              <h1 className={`${playfair.className} text-xl font-normal tracking-wide text-gray-900`}>
                 {album.title.toUpperCase()}
               </h1>
-              <p className={`${lato.className} text-sm font-light text-gray-600`}>
-                PHOTO GALLERY
-              </p>
             </div>
 
             {/* Right: Action Buttons */}
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
+              {/* Sort Button with Visual Indicator */}
               <button 
                 onClick={() => setSortByLiked(!sortByLiked)}
-                className={`${lato.className} text-sm font-light transition-colors ${
-                  sortByLiked ? 'text-gray-900' : 'text-gray-600 hover:text-gray-900'
+                className={`${lato.className} text-xs font-medium transition-all duration-200 flex items-center gap-2 px-3 py-2 rounded-full ${
+                  sortByLiked 
+                    ? 'bg-gray-900 text-white' 
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                {sortByLiked ? 'SHOW ALL' : 'SORT BY LIKED'}
+                <HeartIcon className={`w-3 h-3 ${sortByLiked ? 'fill-current' : ''}`} />
+                {sortByLiked ? 'LIKED' : 'ALL'}
               </button>
-              <div className="h-6 w-px bg-gray-300"></div>
-              <div className="flex items-center gap-4">
+              
+              <div className="h-4 w-px bg-gray-200"></div>
+              
+              <div className="flex items-center gap-2">
                 <button 
                   onClick={() => setShowDownloadModal(true)}
-                  className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                  className="p-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
                   title="Download Options"
                 >
-                  <ArrowDownTrayIcon className="w-5 h-5" />
+                  <ArrowDownTrayIcon className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setShowShareModal(true)}
-                  className="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+                  className="p-2 text-gray-500 hover:text-gray-900 transition-colors rounded-full hover:bg-gray-100"
                   title="Share Gallery"
                 >
-                  <ShareIcon className="w-5 h-5" />
+                  <ShareIcon className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -362,7 +365,7 @@ export default function AlbumPage({ params }: AlbumPageProps) {
       )}
 
       {/* Professional Gallery Grid */}
-      <div ref={galleryRef} className="pt-20 pb-20">
+      <div ref={galleryRef} className="pt-16 pb-20">
         <div className="max-w-7xl mx-auto px-6">
           {!album || !album.assets || album.assets.length === 0 ? (
             <div className="text-center py-20">
@@ -375,55 +378,65 @@ export default function AlbumPage({ params }: AlbumPageProps) {
               <p className={`${lato.className} text-gray-500 text-sm`}>Images will appear here once they're added to this gallery.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {sortedAssets.map((asset: any, idx: number) => {
                 const originalIndex = album.assets.findIndex((a: any) => a.id === asset.id);
+                const isLiked = likedPhotos.includes(asset.id);
                 return (
                   <div key={asset.id} className="group relative">
                     <div 
-                      className="relative cursor-pointer overflow-hidden bg-gray-50"
+                      className="relative cursor-pointer overflow-hidden bg-gray-50 rounded-lg shadow-sm hover:shadow-lg transition-all duration-300"
                       onClick={() => setLightboxIndex(originalIndex)}
                     >
                       <img
                         src={`${API_BASE}/${asset.file_path}`}
                         alt=""
-                        className="w-full h-96 object-cover group-hover:scale-105 transition-transform duration-700"
+                        className="w-full h-80 object-cover group-hover:scale-105 transition-transform duration-500"
                       />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all duration-300" />
+                      
+                      {/* Like indicator - always visible */}
+                      {isLiked && (
+                        <div className="absolute top-3 left-3">
+                          <div className="bg-red-500 text-white rounded-full p-1.5 shadow-lg">
+                            <HeartIcon className="w-3 h-3 fill-current" />
+                          </div>
+                        </div>
+                      )}
                       
                       {/* Professional overlay with action buttons */}
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute bottom-4 right-4 flex gap-2">
+                        <div className="absolute bottom-3 right-3 flex gap-2">
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               toggleLike(asset.id);
                             }}
-                            className={`p-2 rounded-full shadow-lg transition-colors ${
-                              likedPhotos.includes(asset.id) 
-                                ? 'bg-red-500 text-white' 
+                            className={`p-2 rounded-full shadow-lg transition-all duration-200 ${
+                              isLiked
+                                ? 'bg-red-500 text-white hover:bg-red-600' 
                                 : 'bg-white/90 backdrop-blur-sm text-gray-800 hover:bg-white'
                             }`}
                           >
-                            <HeartIcon className={`w-4 h-4 ${likedPhotos.includes(asset.id) ? 'fill-current' : ''}`} />
+                            <HeartIcon className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
                           </button>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDownloadOne(asset.file_path);
                             }}
-                            className="p-2 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full shadow-lg hover:bg-white transition-colors"
+                            className="p-2 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full shadow-lg hover:bg-white transition-all duration-200"
                           >
-                            <ArrowDownTrayIcon className="w-4 h-4" />
+                            <ArrowDownTrayIcon className="w-3.5 h-3.5" />
                           </button>
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowShareModal(true);
                             }}
-                            className="p-2 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full shadow-lg hover:bg-white transition-colors"
+                            className="p-2 bg-white/90 backdrop-blur-sm text-gray-800 rounded-full shadow-lg hover:bg-white transition-all duration-200"
                           >
-                            <ShareIcon className="w-4 h-4" />
+                            <ShareIcon className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
@@ -450,15 +463,15 @@ export default function AlbumPage({ params }: AlbumPageProps) {
 
       {/* Clean Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl">
-            <h3 className={`${playfair.className} text-2xl font-normal text-gray-900 mb-6 text-center`}>
-              Share Gallery
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl">
+            <h3 className={`${playfair.className} text-xl font-normal text-gray-900 mb-2 text-center`}>
+              Share
             </h3>
-            <p className="text-gray-600 mb-6 text-center text-sm">
-              Share this gallery with others using the link below
+            <p className={`${lato.className} text-gray-500 mb-6 text-center text-sm`}>
+              Share this gallery with others
             </p>
-            <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <div className="bg-gray-50 p-4 rounded-xl mb-6">
               <code className="text-xs text-gray-700 break-all">
                 {typeof window !== 'undefined' ? window.location.href : ''}
               </code>
@@ -466,22 +479,22 @@ export default function AlbumPage({ params }: AlbumPageProps) {
             <div className="flex gap-3">
               <button
                 onClick={copyShareLink}
-                className="flex-1 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
+                className="flex-1 bg-gray-900 text-white px-6 py-3 rounded-xl hover:bg-gray-800 transition-all duration-200 text-sm font-medium"
               >
                 Copy Link
               </button>
               <button
                 onClick={handleShare}
-                className="flex-1 bg-gray-100 text-gray-900 px-6 py-3 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                className="flex-1 bg-gray-50 text-gray-900 px-6 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200 text-sm font-medium"
               >
                 Share
               </button>
             </div>
             <button
               onClick={() => setShowShareModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -491,43 +504,43 @@ export default function AlbumPage({ params }: AlbumPageProps) {
 
       {/* Download Options Modal */}
       {showDownloadModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl">
-            <h3 className={`${playfair.className} text-2xl font-normal text-gray-900 mb-6 text-center`}>
-              Download Options
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-sm w-full shadow-2xl">
+            <h3 className={`${playfair.className} text-xl font-normal text-gray-900 mb-2 text-center`}>
+              Download
             </h3>
-            <p className="text-gray-600 mb-6 text-center text-sm">
+            <p className={`${lato.className} text-gray-500 mb-8 text-center text-sm`}>
               Choose what you'd like to download
             </p>
             
-            <div className="space-y-4">
+            <div className="space-y-3">
               <button
                 onClick={handleDownloadAll}
-                className="w-full bg-gray-900 text-white px-6 py-4 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium flex items-center justify-center gap-3"
+                className="w-full bg-gray-900 text-white px-6 py-4 rounded-xl hover:bg-gray-800 transition-all duration-200 text-sm font-medium flex items-center justify-center gap-3 group"
               >
-                <ArrowDownTrayIcon className="w-5 h-5" />
-                Download Full Album ({album?.assets?.length || 0} images)
+                <ArrowDownTrayIcon className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                Full Album ({album?.assets?.length || 0} images)
               </button>
               
               <button
                 onClick={handleDownloadLiked}
                 disabled={likedPhotos.length === 0}
-                className={`w-full px-6 py-4 rounded-lg transition-colors text-sm font-medium flex items-center justify-center gap-3 ${
+                className={`w-full px-6 py-4 rounded-xl transition-all duration-200 text-sm font-medium flex items-center justify-center gap-3 group ${
                   likedPhotos.length === 0
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                    ? 'bg-gray-50 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-50 text-gray-900 hover:bg-gray-100'
                 }`}
               >
-                <HeartIcon className="w-5 h-5" />
-                Download Liked Images ({likedPhotos.length} images)
+                <HeartIcon className={`w-4 h-4 ${likedPhotos.length > 0 ? 'group-hover:scale-110 transition-transform' : ''}`} />
+                Liked Images ({likedPhotos.length} images)
               </button>
             </div>
             
             <button
               onClick={() => setShowDownloadModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>

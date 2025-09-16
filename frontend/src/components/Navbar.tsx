@@ -12,6 +12,13 @@ export default function Navbar() {
 
   const isLoggedIn = !!session;
   const isLoading = status === 'loading';
+  
+  // Hide navbar on album pages
+  const isAlbumPage = pathname.startsWith('/album/');
+  
+  if (isAlbumPage) {
+    return null;
+  }
 
   const handleLogout = () => {
     signOut({ callbackUrl: '/' });

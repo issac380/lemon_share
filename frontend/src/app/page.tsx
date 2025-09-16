@@ -23,12 +23,26 @@ const lato = Lato({
 
 export default function Home() {
   const [albums, setAlbums] = useState<any[]>([]);
+  const [siteSettings, setSiteSettings] = useState<any>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAlbums()
-      .then((data) => setAlbums(data))
-      .finally(() => setLoading(false));
+    const loadData = async () => {
+      try {
+        const [albumsData, settingsData] = await Promise.all([
+          fetchAlbums(),
+          fetch(`${API_BASE}/api/site-settings`).then(res => res.json())
+        ]);
+        setAlbums(albumsData);
+        setSiteSettings(settingsData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadData();
   }, []);
 
   if (loading) {
@@ -45,15 +59,23 @@ export default function Home() {
   return (
     <div className={`${inter.className} min-h-screen bg-white`}>
       {/* Professional Header */}
-      <header className="border-b border-gray-200">
+      <header className="border-b border-gray-200" style={{ backgroundColor: siteSettings.background_color || '#ffffff' }}>
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
-            <h1 className={`${playfair.className} text-5xl md:text-6xl font-normal tracking-wide text-gray-900 mb-4`}>
-              PORTRAITS BY KT MERRY
+            <h1 
+              className={`${playfair.className} text-5xl md:text-6xl font-normal tracking-wide mb-4`}
+              style={{ color: siteSettings.theme_color || '#000000' }}
+            >
+              {siteSettings.site_title || 'PORTRAITS BY KT MERRY'}
             </h1>
             <p className={`${lato.className} text-gray-600 text-sm font-light uppercase tracking-widest`}>
-              PHOTO GALLERIES
+              {siteSettings.site_subtitle || 'PHOTO GALLERIES'}
             </p>
+            {siteSettings.hero_text && (
+              <p className={`${lato.className} text-gray-500 text-base font-light mt-6 max-w-2xl mx-auto`}>
+                {siteSettings.hero_text}
+              </p>
+            )}
           </div>
         </div>
       </header>

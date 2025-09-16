@@ -80,3 +80,53 @@ export async function deleteAsset(assetId: string) {
   if (!res.ok) throw new Error("Failed to delete asset");
   return res.json();
 }
+
+// Site Settings
+export async function getSiteSettings() {
+  const res = await fetch(`${API_BASE}/api/admin/site-settings`, {
+    cache: "no-store",
+  });
+  if (!res.ok) throw new Error("Failed to fetch site settings");
+  return res.json();
+}
+
+export async function updateSiteSettings(settings: any) {
+  const formData = new FormData();
+  Object.keys(settings).forEach(key => {
+    if (settings[key] !== null && settings[key] !== undefined) {
+      formData.append(key, settings[key]);
+    }
+  });
+
+  const res = await fetch(`${API_BASE}/api/admin/site-settings`, {
+    method: "PUT",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Failed to update site settings");
+  return res.json();
+}
+
+// Album Management
+export async function reorderAlbums(albumOrders: Array<{id: string, order: number}>) {
+  const res = await fetch(`${API_BASE}/api/admin/albums/reorder`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(albumOrders),
+  });
+  if (!res.ok) throw new Error("Failed to reorder albums");
+  return res.json();
+}
+
+export async function toggleAlbumPublish(albumId: string, isPublished: boolean) {
+  const formData = new FormData();
+  formData.append("is_published", isPublished.toString());
+
+  const res = await fetch(`${API_BASE}/api/admin/albums/${albumId}/publish`, {
+    method: "PUT",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Failed to toggle album publish status");
+  return res.json();
+}
