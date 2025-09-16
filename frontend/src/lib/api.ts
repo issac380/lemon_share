@@ -1,6 +1,6 @@
 // Load API base URL from environment (frontend/.env.local or .env.production)
 export const API_BASE =
-  process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_API_BASE || "http://127.0.0.1:8001";
 
 // Fetch all albums
 export async function fetchAlbums() {
